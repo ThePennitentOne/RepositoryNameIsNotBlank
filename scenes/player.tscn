@@ -1,0 +1,53 @@
+[gd_scene load_steps=9 format=3 uid="uid://7bye323osmu4"]
+
+[ext_resource type="Texture2D" uid="uid://c7vs37mscidl3" path="res://icon.svg" id="1_2oq5y"]
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_fcefb"]
+[ext_resource type="Script" path="res://addons/behaviour_toolkit/finite_state_machine/fsm.gd" id="2_brjuu"]
+[ext_resource type="Script" path="res://scripts/state/board_init_state.gd" id="3_a3kb7"]
+[ext_resource type="Script" path="res://scripts/state/transition/always_transition.gd" id="5_7ledb"]
+[ext_resource type="Script" path="res://scripts/state/time_state.gd" id="6_qqqbm"]
+[ext_resource type="Script" path="res://scripts/state/transition/timed_transition.gd" id="7_uf566"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_njhys"]
+size = Vector2(50, 50)
+
+[node name="Player" type="Node2D"]
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+script = ExtResource("1_fcefb")
+
+[node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D"]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("1_2oq5y")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
+shape = SubResource("RectangleShape2D_njhys")
+
+[node name="FiniteStateMachine" type="Node" parent="CharacterBody2D" node_paths=PackedStringArray("initial_state", "actor")]
+script = ExtResource("2_brjuu")
+autostart = true
+initial_state = NodePath("FSMBoardInit")
+actor = NodePath("..")
+
+[node name="FSMBoardInit" type="Node" parent="CharacterBody2D/FiniteStateMachine"]
+script = ExtResource("3_a3kb7")
+
+[node name="FSMAlwaysTransition" type="Node" parent="CharacterBody2D/FiniteStateMachine/FSMBoardInit" node_paths=PackedStringArray("next_state")]
+script = ExtResource("5_7ledb")
+next_state = NodePath("../../TimedState1")
+
+[node name="TimedState1" type="Node" parent="CharacterBody2D/FiniteStateMachine"]
+script = ExtResource("6_qqqbm")
+
+[node name="TimedTransitionTo2" type="Node" parent="CharacterBody2D/FiniteStateMachine/TimedState1" node_paths=PackedStringArray("next_state")]
+script = ExtResource("7_uf566")
+time = 2.0
+next_state = NodePath("../../TimedState2")
+
+[node name="TimedState2" type="Node" parent="CharacterBody2D/FiniteStateMachine"]
+script = ExtResource("6_qqqbm")
+
+[node name="TimedTransitionTo1" type="Node" parent="CharacterBody2D/FiniteStateMachine/TimedState2" node_paths=PackedStringArray("next_state")]
+script = ExtResource("7_uf566")
+time = 3.0
+next_state = NodePath("../../TimedState1")
